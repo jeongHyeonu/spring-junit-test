@@ -1,9 +1,7 @@
 package org.example.junit_study.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.junit_study.domain.user.UserEnum;
-import org.example.junit_study.dto.ResponseDto;
-import org.example.junit_study.util.CustonResponseUtil;
+import org.example.junit_study.util.CustomResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -59,9 +57,16 @@ public class SecurityConfig {
 
         http.httpBasic(hb->hb.disable());
 
+        // 필터 적용
+        http.with(new CustomSecurityFilterManager(), c-> c.build());
+
         // Exception 가로채기
+        http.exceptionHandling(e-> e.authenticationEntryPoint((request, response, authenticationException) -> {
+            CustomResponseUtil.fail(response,"로그인을 진행 해 주세요.", HttpStatus.UNAUTHORIZED);
+        }));
+
         http.exceptionHandling(e-> e.accessDeniedHandler((request, response, accessDeniedException) -> {
-            CustonResponseUtil.unAuthentication(response,"로그인을 진행 해 주세요.");
+            CustomResponseUtil.fail(response,"권한이 없습니다.", HttpStatus.FORBIDDEN);
         }));
 
         http.authorizeHttpRequests(c->

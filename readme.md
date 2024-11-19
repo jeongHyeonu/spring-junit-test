@@ -67,7 +67,7 @@ account 테이블과 transaction 테이블을 1:N 으로 설계한다.
 
 [`User.java`](https://github.com/jeongHyeonu/spring-junit-test/blob/main/junit_study/src/main/java/org/example/junit_study/domain/user/User.java) [`Account.java`](https://github.com/jeongHyeonu/spring-junit-test/blob/main/junit_study/src/main/java/org/example/junit_study/domain/account/Account.java) [`Transaction.java`](https://github.com/jeongHyeonu/spring-junit-test/blob/main/junit_study/src/main/java/org/example/junit_study/domain/transaction/Transaction.java)
 
-<h1>section 2.
+<h1>section 2.</h1>
 
 ## 스프링부트 시큐리티 세팅
 
@@ -90,3 +90,27 @@ http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
 ```
 
 **시큐리티 6.0부터는 websecurityconfigureradapter가 deprecated가 되고 SecurityFilterChain bean을 생성하도록 변경되었음을 유의하자.**
+
+<h1>section 3.</h1>
+
+
+회원가입 controller 만들기
+
+(딱히 중요한거 없어서 생략..)
+
+
+<h1>section 4.
+
+## 스프링부트 JWT 인증과 인가
+
+해당 과정을 잘 알아두자.
+
+UPAF(인증) / BAF(인가)
+
+<p align="center">
+ <img src = "./image/3.png">
+</p>
+
+<h1>section 5.</h1>
+
+### 계좌등록 서비스/컨트롤러 테스트
