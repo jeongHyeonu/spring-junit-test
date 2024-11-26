@@ -115,7 +115,13 @@ UPAF(인증) / BAF(인가)
 
 ### 계좌등록 서비스/컨트롤러 테스트
 
+
+
 테스트시에는 insert 한것들이 전부 Persist Context에 올라감 (영속화)
+
+<p align="center">
+ <img src = "./image/4.png">
+</p>
 
 유저 정보와 같은 데이터는 Persist Context에 있으면 DB에 쿼리를 하지 않고, 캐시를 해서 불러온다.
 
