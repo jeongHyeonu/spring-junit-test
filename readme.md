@@ -114,3 +114,103 @@ UPAF(인증) / BAF(인가)
 <h1>section 5.</h1>
 
 ### 계좌등록 서비스/컨트롤러 테스트
+
+테스트시에는 insert 한것들이 전부 Persist Context에 올라감 (영속화)
+
+유저 정보와 같은 데이터는 Persist Context에 있으면 DB에 쿼리를 하지 않고, 캐시를 해서 불러온다.
+
+- 최초 select는 쿼리가 발생함. 
+- Lazy 로딩은 PC에 있다면 쿼리 발생안함! (없으면 쿼리 발생)
+- Junit 테스트에서 delete 쿼리 로그는 DB관련(DML)으로 가장 마지막에 실행되면 발동안됨.
+
+영속화 된것들을 초기화 해주는 것이 개발 모드와 동일한 환경으로 테스트를 할 수 있게 해준다!
+
+그러므로, 아래 코드와 같이 EntityManager로 Persist Context에 올라간 데이터를 지워줘야 한다.
+
+
+
+`JUnit test Code`
+```java
+  // ...생략... //
+
+  @Autowired
+  private EntityManager em;
+
+  @BeforeEach
+  public void setUp() {
+      userRepository.save(newUser()) // persist context에 데이터 저장 
+      em.clear();
+  }
+
+  // ...생략... //
+```
+
+
+### JUnit Test 시 primary key 이슈 
+
+> `@Transaction` 어노테이션은 테스트를 롤백시킨다!
+
+`@Transaction` 어노테이션 유의점 :
+  - `BeforeEach`로 데이터를 유저1(pk=1), 유저2(pk=2)를 insert 한 다음, 테스트 후 롤백된 다음 `BeforeEach`로 데이터를 insert 하게 된다면, 해당 유저의 pk=3, pk=4 가 된다.
+  - 즉, 다음 테스트에 영향을 준다! (pk는 초기화 되지 않으므로..)
+
+ID 조회 시 pk 문제로 이슈가 생길 수 있으므로, 쿼리로 테이블을 drop/truncate 를 해주는게 좋다
+
+
+
+### @JsonIgnore
+이 어노테이션은 클라이언트에 값을 노출하지 않고, 서버에서만 확인할 수 있다.
+```java
+    private Long id;
+    private String name;
+
+    // 클라이언트에 값을 보내지 않음, 서버에서만 테스트 용으로 확인
+    @JsonIgnore
+    private Long balance;
+```
+
+
+## Cors 테스트
+
+클라이언트에서 인증 헤더를 받을 때, jwt 설정을 아래와 같이 설정해 주어야 한다.
+
+```java
+// jwt 설정 코드 중에서..
+
+configuration.addExposedHeader("Authorization"); // 옛날에는 디폴트 였다 (지금은 아님)
+```
+
+그러면 클라이언트에서 쿠키/세션 스토리지로 보관 가능하다.
+
+[(클라이언트 참고 코드)](https://github.com/codingspecialist/junit-bank-class/blob/main/fetch-test.html)
+
+
+## 동적쿼리 생성
+
+동적 쿼리란?
+
+입출금내역과 같은 특정 상황이나 조건을 적용하여 검색하고 싶을 때 작성하는 쿼리. **JPQL** 을 이용한다.
+
+`~Repository` / `~RepositoryImpl` ***인터페이스를 구현하는 방식*** 으로 작성해야 함을 유의할것! 이게 정석이고, 공식이다. 하나의 문법임을 기억하자!!
+
+_(그렇게 안하면 동적 쿼리를 못 만들어낸다)_
+
+`@Quary` 어노테이션을 이용해서 JPQL을 구현할 수 있지만, entityManager(em) 으로도 생성이 가능하다.
+
+```java
+// 동적 쿼리 만들고 결과 반환
+List<entity> result = em.createQuery("select e from entity e where e.id = '1'", entity.class).getResultList();
+```
+
+[(예제 코드)](https://github.com/codingspecialist/junit-bank-class/blob/main/src/main/java/shop/mtcoding/bank/domain/transaction/TransactionRepositoryImpl.java)
+
+## Inner Join & Outer Join
+
+INNER JOIN에서는 일치하지 않는 레코드는 모두 버리지만, OUTER JOIN에서는 일치하지 않더라도 버리지 않고 NULL로 채워서 결과를 응답
+
+예시 :
+
+`A : 1, 2, 3` 이고, `B : 2, 3, 4` 일때
+
+- Inner Join 시 - 교집합 : 2, 3
+- Outer Join 시 - 합집합 : 1, 2, 3, 4
