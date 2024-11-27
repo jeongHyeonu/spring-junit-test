@@ -113,11 +113,11 @@ UPAF(인증) / BAF(인가)
 
 <h1>section 5.</h1>
 
-### 계좌등록 서비스/컨트롤러 테스트
+### 영속화 (테스트 시) 데이터
 
 
 
-테스트시에는 insert 한것들이 전부 Persist Context에 올라감 (영속화)
+테스트시에는 insert 한것들이 전부 Persist Context에 올라감 (영속화, db에 바로 넣지 않음)
 
 <p align="center">
  <img src = "./image/4.png">
